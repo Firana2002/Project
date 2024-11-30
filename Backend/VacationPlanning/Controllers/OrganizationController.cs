@@ -1,14 +1,13 @@
-// Controllers/OrganizationsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[ApiController]
 [Route("api/[controller]")]
-public class OrganizationsController : ControllerBase
+[ApiController]
+public class OrganizationController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly VacationPlanningContext _context;
 
-    public OrganizationsController(AppDbContext context)
+    public OrganizationController(VacationPlanningContext context)
     {
         _context = context;
     }
@@ -23,10 +22,7 @@ public class OrganizationsController : ControllerBase
     public async Task<ActionResult<Organization>> GetOrganization(int id)
     {
         var organization = await _context.Organizations.FindAsync(id);
-        if (organization == null)
-        {
-            return NotFound();
-        }
+        if (organization == null) return NotFound();
         return organization;
     }
 
@@ -35,19 +31,25 @@ public class OrganizationsController : ControllerBase
     {
         _context.Organizations.Add(organization);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetOrganization), new { id = organization.Id }, organization);
+        return CreatedAtAction("GetOrganization", new { id = organization.Id }, organization);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutOrganization(int id, Organization organization)
     {
-        if (id != organization.Id)
+        if (id != organization.Id) return BadRequest();
+        _context.Entry(organization).State = EntityState.Modified;
+
+        try
         {
-            return BadRequest();
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!OrganizationExists(id)) return NotFound();
+            throw;
         }
 
-        _context.Entry(organization).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
@@ -55,13 +57,16 @@ public class OrganizationsController : ControllerBase
     public async Task<IActionResult> DeleteOrganization(int id)
     {
         var organization = await _context.Organizations.FindAsync(id);
-        if (organization == null)
-        {
-            return NotFound();
-        }
+        if (organization == null) return NotFound();
 
         _context.Organizations.Remove(organization);
         await _context.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private bool OrganizationExists(int id)
+    {
+        return _context.Organizations.Any(e => e.Id == id);
     }
 }

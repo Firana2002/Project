@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Планирование отпусков(En+)\\VacationPlanning\\VacationPlanning.csproj": {}
+    "C:\\Планирование отпусков(En+)\\отпуска\\Backend\\VacationPlanning\\VacationPlanning.csproj": {}
   },
   "projects": {
-    "C:\\Планирование отпусков(En+)\\VacationPlanning\\VacationPlanning.csproj": {
+    "C:\\Планирование отпусков(En+)\\отпуска\\Backend\\VacationPlanning\\VacationPlanning.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Планирование отпусков(En+)\\VacationPlanning\\VacationPlanning.csproj",
+        "projectUniqueName": "C:\\Планирование отпусков(En+)\\отпуска\\Backend\\VacationPlanning\\VacationPlanning.csproj",
         "projectName": "VacationPlanning",
-        "projectPath": "C:\\Планирование отпусков(En+)\\VacationPlanning\\VacationPlanning.csproj",
+        "projectPath": "C:\\Планирование отпусков(En+)\\отпуска\\Backend\\VacationPlanning\\VacationPlanning.csproj",
         "packagesPath": "C:\\Users\\Firan\\.nuget\\packages\\",
-        "outputPath": "C:\\Планирование отпусков(En+)\\VacationPlanning\\obj\\",
+        "outputPath": "C:\\Планирование отпусков(En+)\\отпуска\\Backend\\VacationPlanning\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Firan\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -43,6 +43,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.4, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.10, )"

@@ -1,14 +1,12 @@
-// Controllers/HolidaysController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-[ApiController]
 [Route("api/[controller]")]
-public class HolidaysController : ControllerBase
+[ApiController]
+public class HolidayController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly VacationPlanningContext _context;
 
-    public HolidaysController(AppDbContext context)
+    public HolidayController(VacationPlanningContext context)
     {
         _context = context;
     }
@@ -23,10 +21,7 @@ public class HolidaysController : ControllerBase
     public async Task<ActionResult<Holiday>> GetHoliday(int id)
     {
         var holiday = await _context.Holidays.FindAsync(id);
-        if (holiday == null)
-        {
-            return NotFound();
-        }
+        if (holiday == null) return NotFound();
         return holiday;
     }
 
@@ -35,19 +30,25 @@ public class HolidaysController : ControllerBase
     {
         _context.Holidays.Add(holiday);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetHoliday), new { id = holiday.Id }, holiday);
+        return CreatedAtAction("GetHoliday", new { id = holiday.Id }, holiday);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutHoliday(int id, Holiday holiday)
     {
-        if (id != holiday.Id)
+        if (id != holiday.Id) return BadRequest();
+        _context.Entry(holiday).State = EntityState.Modified;
+
+        try
         {
-            return BadRequest();
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!HolidayExists(id)) return NotFound();
+            throw;
         }
 
-        _context.Entry(holiday).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
@@ -55,13 +56,16 @@ public class HolidaysController : ControllerBase
     public async Task<IActionResult> DeleteHoliday(int id)
     {
         var holiday = await _context.Holidays.FindAsync(id);
-        if (holiday == null)
-        {
-            return NotFound();
-        }
+        if (holiday == null) return NotFound();
 
         _context.Holidays.Remove(holiday);
         await _context.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private bool HolidayExists(int id)
+    {
+        return _context.Holidays.Any(e => e.Id == id);
     }
 }

@@ -1,14 +1,11 @@
-// Controllers/EmployeesController.cs
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore;[Route("api/[controller]")]
 [ApiController]
-[Route("api/[controller]")]
-public class EmployeesController : ControllerBase
+public class EmployeeController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly VacationPlanningContext _context;
 
-    public EmployeesController(AppDbContext context)
+    public EmployeeController(VacationPlanningContext context)
     {
         _context = context;
     }
@@ -23,10 +20,7 @@ public class EmployeesController : ControllerBase
     public async Task<ActionResult<Employee>> GetEmployee(int id)
     {
         var employee = await _context.Employees.Include(e => e.Department).FirstOrDefaultAsync(e => e.Id == id);
-        if (employee == null)
-        {
-            return NotFound();
-        }
+        if (employee == null) return NotFound();
         return employee;
     }
 
@@ -35,19 +29,25 @@ public class EmployeesController : ControllerBase
     {
         _context.Employees.Add(employee);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, employee);
+        return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutEmployee(int id, Employee employee)
     {
-        if (id != employee.Id)
+        if (id != employee.Id) return BadRequest();
+        _context.Entry(employee).State = EntityState.Modified;
+
+        try
         {
-            return BadRequest();
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!EmployeeExists(id)) return NotFound();
+            throw;
         }
 
-        _context.Entry(employee).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
@@ -55,13 +55,16 @@ public class EmployeesController : ControllerBase
     public async Task<IActionResult> DeleteEmployee(int id)
     {
         var employee = await _context.Employees.FindAsync(id);
-        if (employee == null)
-        {
-            return NotFound();
-        }
+        if (employee == null) return NotFound();
 
         _context.Employees.Remove(employee);
         await _context.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private bool EmployeeExists(int id)
+    {
+        return _context.Employees.Any(e => e.Id == id);
     }
 }

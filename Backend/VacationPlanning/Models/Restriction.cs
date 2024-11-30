@@ -1,5 +1,5 @@
 public class Restriction
 {
     public int Id { get; set; }
-    public string Type { get; set; } // Legislative or Corporate
+    public string RestrictionType { get; set; } // Тип ограничения (законодательное, корпоративное)
 }

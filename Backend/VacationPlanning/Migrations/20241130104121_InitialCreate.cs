@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace VacationPlanning.Migrations
 {
     /// <inheritdoc />
@@ -19,11 +17,25 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    HolidayDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    HolidayDescription = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Holidays", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LeaveTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LeaveTypeName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LeaveTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -32,7 +44,7 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OrganizationName = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -45,7 +57,7 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PositionTitle = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,24 +70,11 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    RestrictionType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Restrictions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "VacationTypes",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_VacationTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -84,7 +83,7 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DepartmentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrganizationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -104,8 +103,8 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    DepartmentId = table.Column<int>(type: "int", nullable: false),
-                    RestrictionId = table.Column<int>(type: "int", nullable: false)
+                    RestrictionId = table.Column<int>(type: "int", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,7 +129,7 @@ namespace VacationPlanning.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployeeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -145,34 +144,34 @@ namespace VacationPlanning.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmployeeVacationBalances",
+                name: "LeaveDays",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeId = table.Column<int>(type: "int", nullable: false),
-                    VacationTypeId = table.Column<int>(type: "int", nullable: false),
-                    Days = table.Column<int>(type: "int", nullable: false)
+                    LeaveTypeId = table.Column<int>(type: "int", nullable: false),
+                    TotalDays = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmployeeVacationBalances", x => x.Id);
+                    table.PrimaryKey("PK_LeaveDays", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EmployeeVacationBalances_Employees_EmployeeId",
+                        name: "FK_LeaveDays_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EmployeeVacationBalances_VacationTypes_VacationTypeId",
-                        column: x => x.VacationTypeId,
-                        principalTable: "VacationTypes",
+                        name: "FK_LeaveDays_LeaveTypes_LeaveTypeId",
+                        column: x => x.LeaveTypeId,
+                        principalTable: "LeaveTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ScheduledVacations",
+                name: "ScheduledLeaves",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -183,38 +182,13 @@ namespace VacationPlanning.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ScheduledVacations", x => x.Id);
+                    table.PrimaryKey("PK_ScheduledLeaves", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ScheduledVacations_Employees_EmployeeId",
+                        name: "FK_ScheduledLeaves_Employees_EmployeeId",
                         column: x => x.EmployeeId,
                         principalTable: "Employees",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.InsertData(
-                table: "Organizations",
-                columns: new[] { "Id", "Name" },
-                values: new object[] { 1, "Эн+ Диджитал" });
-
-            migrationBuilder.InsertData(
-                table: "Restrictions",
-                columns: new[] { "Id", "Type" },
-                values: new object[,]
-                {
-                    { 1, "законодательное" },
-                    { 2, "корпоративное" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "VacationTypes",
-                columns: new[] { "Id", "Name" },
-                values: new object[,]
-                {
-                    { 1, "ежегодный основной" },
-                    { 2, "ежегодный дополнительный" },
-                    { 3, "учебный" },
-                    { 4, "без сохранения зарплаты" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -238,18 +212,18 @@ namespace VacationPlanning.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployeeVacationBalances_EmployeeId",
-                table: "EmployeeVacationBalances",
+                name: "IX_LeaveDays_EmployeeId",
+                table: "LeaveDays",
                 column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployeeVacationBalances_VacationTypeId",
-                table: "EmployeeVacationBalances",
-                column: "VacationTypeId");
+                name: "IX_LeaveDays_LeaveTypeId",
+                table: "LeaveDays",
+                column: "LeaveTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ScheduledVacations_EmployeeId",
-                table: "ScheduledVacations",
+                name: "IX_ScheduledLeaves_EmployeeId",
+                table: "ScheduledLeaves",
                 column: "EmployeeId");
         }
 
@@ -260,22 +234,22 @@ namespace VacationPlanning.Migrations
                 name: "DepartmentRestrictions");
 
             migrationBuilder.DropTable(
-                name: "EmployeeVacationBalances");
+                name: "Holidays");
 
             migrationBuilder.DropTable(
-                name: "Holidays");
+                name: "LeaveDays");
 
             migrationBuilder.DropTable(
                 name: "Positions");
 
             migrationBuilder.DropTable(
-                name: "ScheduledVacations");
+                name: "ScheduledLeaves");
 
             migrationBuilder.DropTable(
                 name: "Restrictions");
 
             migrationBuilder.DropTable(
-                name: "VacationTypes");
+                name: "LeaveTypes");
 
             migrationBuilder.DropTable(
                 name: "Employees");

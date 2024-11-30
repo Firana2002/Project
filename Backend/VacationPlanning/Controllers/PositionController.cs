@@ -1,14 +1,15 @@
-// Controllers/PositionsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[ApiController]
-[Route("api/[controller]")]
-public class PositionsController : ControllerBase
-{
-    private readonly AppDbContext _context;
 
-    public PositionsController(AppDbContext context)
+
+[Route("api/[controller]")]
+[ApiController]
+public class PositionController : ControllerBase
+{
+    private readonly VacationPlanningContext _context;
+
+    public PositionController(VacationPlanningContext context)
     {
         _context = context;
     }
@@ -23,10 +24,7 @@ public class PositionsController : ControllerBase
     public async Task<ActionResult<Position>> GetPosition(int id)
     {
         var position = await _context.Positions.FindAsync(id);
-        if (position == null)
-        {
-            return NotFound();
-        }
+        if (position == null) return NotFound();
         return position;
     }
 
@@ -35,19 +33,25 @@ public class PositionsController : ControllerBase
     {
         _context.Positions.Add(position);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetPosition), new { id = position.Id }, position);
+        return CreatedAtAction("GetPosition", new { id = position.Id }, position);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutPosition(int id, Position position)
     {
-        if (id != position.Id)
+        if (id != position.Id) return BadRequest();
+        _context.Entry(position).State = EntityState.Modified;
+
+        try
         {
-            return BadRequest();
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PositionExists(id)) return NotFound();
+            throw;
         }
 
-        _context.Entry(position).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
@@ -55,13 +59,16 @@ public class PositionsController : ControllerBase
     public async Task<IActionResult> DeletePosition(int id)
     {
         var position = await _context.Positions.FindAsync(id);
-        if (position == null)
-        {
-            return NotFound();
-        }
+        if (position == null) return NotFound();
 
         _context.Positions.Remove(position);
         await _context.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private bool PositionExists(int id)
+    {
+        return _context.Positions.Any(e => e.Id == id);
     }
 }

@@ -3,16 +3,19 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace VacationPlanning.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(VacationPlanningContext))]
+    [Migration("20241130105506_SeedData")]
+    partial class SeedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,7 +32,7 @@ namespace VacationPlanning.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("DepartmentName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -41,6 +44,14 @@ namespace VacationPlanning.Migrations
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Departments");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DepartmentName = "IT",
+                            OrganizationId = 1
+                        });
                 });
 
             modelBuilder.Entity("DepartmentRestriction", b =>
@@ -64,6 +75,14 @@ namespace VacationPlanning.Migrations
                     b.HasIndex("RestrictionId");
 
                     b.ToTable("DepartmentRestrictions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DepartmentId = 1,
+                            RestrictionId = 1
+                        });
                 });
 
             modelBuilder.Entity("Employee", b =>
@@ -77,7 +96,7 @@ namespace VacationPlanning.Migrations
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("EmployeeName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -86,32 +105,14 @@ namespace VacationPlanning.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
-                });
 
-            modelBuilder.Entity("EmployeeVacationBalance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Days")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VacationTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("VacationTypeId");
-
-                    b.ToTable("EmployeeVacationBalances");
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DepartmentId = 1,
+                            EmployeeName = "Иванов Иван Иванович"
+                        });
                 });
 
             modelBuilder.Entity("Holiday", b =>
@@ -122,12 +123,98 @@ namespace VacationPlanning.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime>("HolidayDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("HolidayDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Holidays");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            HolidayDate = new DateTime(2023, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            HolidayDescription = "Новый год"
+                        });
+                });
+
+            modelBuilder.Entity("LeaveDays", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LeaveTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalDays")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("LeaveTypeId");
+
+                    b.ToTable("LeaveDays");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EmployeeId = 1,
+                            LeaveTypeId = 1,
+                            TotalDays = 14
+                        });
+                });
+
+            modelBuilder.Entity("LeaveType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("LeaveTypeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LeaveTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            LeaveTypeName = "Ежегодный основной"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            LeaveTypeName = "Ежегодный дополнительный"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            LeaveTypeName = "Учебный"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            LeaveTypeName = "Без сохранения зарплаты"
+                        });
                 });
 
             modelBuilder.Entity("Organization", b =>
@@ -138,7 +225,7 @@ namespace VacationPlanning.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("OrganizationName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -150,7 +237,7 @@ namespace VacationPlanning.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Эн+ Диджитал"
+                            OrganizationName = "Эн+ Диджитал"
                         });
                 });
 
@@ -162,13 +249,20 @@ namespace VacationPlanning.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Title")
+                    b.Property<string>("PositionTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Positions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            PositionTitle = "Разработчик"
+                        });
                 });
 
             modelBuilder.Entity("Restriction", b =>
@@ -179,7 +273,7 @@ namespace VacationPlanning.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Type")
+                    b.Property<string>("RestrictionType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -191,16 +285,11 @@ namespace VacationPlanning.Migrations
                         new
                         {
                             Id = 1,
-                            Type = "законодательное"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Type = "корпоративное"
+                            RestrictionType = "Законодательное"
                         });
                 });
 
-            modelBuilder.Entity("ScheduledVacation", b =>
+            modelBuilder.Entity("ScheduledLeave", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,45 +310,15 @@ namespace VacationPlanning.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("ScheduledVacations");
-                });
-
-            modelBuilder.Entity("VacationType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("VacationTypes");
+                    b.ToTable("ScheduledLeaves");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Name = "ежегодный основной"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "ежегодный дополнительный"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "учебный"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "без сохранения зарплаты"
+                            EmployeeId = 1,
+                            EndDate = new DateTime(2023, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            StartDate = new DateTime(2023, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -304,7 +363,7 @@ namespace VacationPlanning.Migrations
                     b.Navigation("Department");
                 });
 
-            modelBuilder.Entity("EmployeeVacationBalance", b =>
+            modelBuilder.Entity("LeaveDays", b =>
                 {
                     b.HasOne("Employee", "Employee")
                         .WithMany()
@@ -312,18 +371,18 @@ namespace VacationPlanning.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VacationType", "VacationType")
+                    b.HasOne("LeaveType", "LeaveType")
                         .WithMany()
-                        .HasForeignKey("VacationTypeId")
+                        .HasForeignKey("LeaveTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Employee");
 
-                    b.Navigation("VacationType");
+                    b.Navigation("LeaveType");
                 });
 
-            modelBuilder.Entity("ScheduledVacation", b =>
+            modelBuilder.Entity("ScheduledLeave", b =>
                 {
                     b.HasOne("Employee", "Employee")
                         .WithMany()

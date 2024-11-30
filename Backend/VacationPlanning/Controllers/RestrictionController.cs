@@ -1,14 +1,15 @@
-// Controllers/RestrictionsController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-[ApiController]
-[Route("api/[controller]")]
-public class RestrictionsController : ControllerBase
-{
-    private readonly AppDbContext _context;
 
-    public RestrictionsController(AppDbContext context)
+
+[Route("api/[controller]")]
+[ApiController]
+public class RestrictionController : ControllerBase
+{
+    private readonly VacationPlanningContext _context;
+
+    public RestrictionController(VacationPlanningContext context)
     {
         _context = context;
     }
@@ -23,10 +24,7 @@ public class RestrictionsController : ControllerBase
     public async Task<ActionResult<Restriction>> GetRestriction(int id)
     {
         var restriction = await _context.Restrictions.FindAsync(id);
-        if (restriction == null)
-        {
-            return NotFound();
-        }
+        if (restriction == null) return NotFound();
         return restriction;
     }
 
@@ -35,19 +33,25 @@ public class RestrictionsController : ControllerBase
     {
         _context.Restrictions.Add(restriction);
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetRestriction), new { id = restriction.Id }, restriction);
+        return CreatedAtAction("GetRestriction", new { id = restriction.Id }, restriction);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> PutRestriction(int id, Restriction restriction)
     {
-        if (id != restriction.Id)
+        if (id != restriction.Id) return BadRequest();
+        _context.Entry(restriction).State = EntityState.Modified;
+
+        try
         {
-            return BadRequest();
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!RestrictionExists(id)) return NotFound();
+            throw;
         }
 
-        _context.Entry(restriction).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
         return NoContent();
     }
 
@@ -55,13 +59,16 @@ public class RestrictionsController : ControllerBase
     public async Task<IActionResult> DeleteRestriction(int id)
     {
         var restriction = await _context.Restrictions.FindAsync(id);
-        if (restriction == null)
-        {
-            return NotFound();
-        }
+        if (restriction == null) return NotFound();
 
         _context.Restrictions.Remove(restriction);
         await _context.SaveChangesAsync();
+
         return NoContent();
+    }
+
+    private bool RestrictionExists(int id)
+    {
+        return _context.Restrictions.Any(e => e.Id == id);
     }
 }
